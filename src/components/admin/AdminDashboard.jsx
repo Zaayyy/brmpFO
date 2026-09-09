@@ -21,7 +21,9 @@ import {
   ShieldCheck,
   Clock,
   PlusCircle,
-  FileSpreadsheet
+  FileSpreadsheet,
+  AlertTriangle,
+  CheckCircle2
 } from 'lucide-react';
 import { soundManager } from '../../utils/audio';
 import {
@@ -55,29 +57,63 @@ export default function AdminDashboard({ onLogout, onBackToFO }) {
     return () => clearInterval(timer);
   }, []);
 
-  const handleLogout = () => {
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
+
+  const promptResetData = () => {
     soundManager.playClick();
-    if (window.confirm('Apakah Anda yakin ingin keluar dari sesi Dashboard Admin?')) {
-      clearAdminAuth();
-      onLogout();
-    }
+    setIsResetConfirmOpen(true);
   };
 
-  const handleDelete = (id, nama) => {
-    soundManager.playClick();
-    if (window.confirm(`Hapus catatan kunjungan dari "${nama}"? Data yang dihapus tidak dapat dikembalikan.`)) {
-      const updated = deleteGuestbookEntry(id);
-      setEntries(updated);
-      soundManager.playSuccess();
-    }
+  const executeResetData = () => {
+    const sample = resetGuestbookData();
+    setEntries(sample);
+    setIsResetConfirmOpen(false);
+    soundManager.playSuccess();
+    showToast('Data contoh BRMP DIY berhasil dimuat ulang.');
   };
 
-  const handleResetData = () => {
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => {
+      setToastMsg('');
+    }, 3200);
+  };
+
+  const promptLogout = () => {
     soundManager.playClick();
-    if (window.confirm('Reset seluruh data ke data sampel contoh BRMP DIY?')) {
-      const sample = resetGuestbookData();
-      setEntries(sample);
-      soundManager.playSuccess();
+    setIsLogoutConfirmOpen(true);
+  };
+
+  const executeLogout = () => {
+    soundManager.playSuccess();
+    clearAdminAuth();
+    onLogout();
+  };
+
+  const promptDelete = (item) => {
+    soundManager.playClick();
+    setDeleteTarget(item);
+  };
+
+  const executeDelete = () => {
+    if (!deleteTarget) return;
+    const deletedName = deleteTarget.nama;
+    const updated = deleteGuestbookEntry(deleteTarget.id);
+    setEntries(updated);
+    setDeleteTarget(null);
+    if (isDetailOpen && selectedEntry?.id === deleteTarget.id) {
+      setIsDetailOpen(false);
+      setSelectedEntry(null);
+    }
+    soundManager.playSuccess();
+    showToast(`Catatan kunjungan dari "${deletedName}" berhasil dihapus.`);
+
+    const newTotalPages = Math.ceil(updated.length / itemsPerPage) || 1;
+    if (currentPage > newTotalPages) {
+      setCurrentPage(newTotalPages);
     }
   };
 
@@ -213,7 +249,7 @@ export default function AdminDashboard({ onLogout, onBackToFO }) {
             </button>
 
             <button
-              onClick={handleLogout}
+              onClick={promptLogout}
               className="btn-nav-logout"
               title="Keluar dari sesi administrator"
             >
@@ -370,7 +406,7 @@ export default function AdminDashboard({ onLogout, onBackToFO }) {
 
               <button
                 type="button"
-                onClick={handleResetData}
+                onClick={promptResetData}
                 className="btn-action-tool btn-reset"
                 title="Muat ulang data sampel default"
               >
@@ -465,7 +501,7 @@ export default function AdminDashboard({ onLogout, onBackToFO }) {
                               <Eye size={16} />
                             </button>
                             <button
-                              onClick={() => handleDelete(item.id, item.nama)}
+                              onClick={() => promptDelete(item)}
                               className="btn-table-action delete"
                               title="Hapus Data Tamu"
                             >
@@ -548,7 +584,173 @@ export default function AdminDashboard({ onLogout, onBackToFO }) {
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
         entry={selectedEntry}
+        onDelete={(item) => {
+          setIsDetailOpen(false);
+          promptDelete(item);
+        }}
       />
+
+      {/* Custom Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="modal-backdrop-overlay" onClick={() => setDeleteTarget(null)}>
+          <div
+            className="kiosk-modal-card confirm-dialog-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="confirm-dialog-header danger">
+              <div className="confirm-icon-wrap danger">
+                <AlertTriangle size={24} />
+              </div>
+              <div>
+                <h3 className="confirm-title">Hapus Catatan Kunjungan?</h3>
+                <p className="confirm-subtitle">Tindakan ini permanen dan tidak dapat dibatalkan</p>
+              </div>
+            </div>
+
+            <div className="confirm-dialog-body">
+              <div className="confirm-target-box">
+                <div className="confirm-target-row">
+                  <span className="confirm-target-label">Nama Tamu:</span>
+                  <span className="confirm-target-val">{deleteTarget.nama}</span>
+                </div>
+                <div className="confirm-target-row">
+                  <span className="confirm-target-label">Asal / Instansi:</span>
+                  <span className="confirm-target-val">
+                    {deleteTarget.asal === 'Perorangan' ? 'Perorangan' : deleteTarget.nama_instansi}
+                  </span>
+                </div>
+                <div className="confirm-target-row">
+                  <span className="confirm-target-label">Waktu:</span>
+                  <span className="confirm-target-val">{deleteTarget.timestamp}</span>
+                </div>
+              </div>
+              <p className="confirm-message-text">
+                Apakah Anda yakin ingin menghapus data buku tamu ini dari sistem?
+              </p>
+            </div>
+
+            <div className="confirm-dialog-footer">
+              <button
+                type="button"
+                className="btn-confirm-cancel"
+                onClick={() => setDeleteTarget(null)}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className="btn-confirm-danger"
+                onClick={executeDelete}
+              >
+                <Trash2 size={16} />
+                <span>Ya, Hapus Data</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Logout Confirmation Modal */}
+      {isLogoutConfirmOpen && (
+        <div className="modal-backdrop-overlay" onClick={() => setIsLogoutConfirmOpen(false)}>
+          <div
+            className="kiosk-modal-card confirm-dialog-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="confirm-dialog-header neutral">
+              <div className="confirm-icon-wrap neutral">
+                <LogOut size={22} />
+              </div>
+              <div>
+                <h3 className="confirm-title">Keluar dari Dashboard Admin?</h3>
+                <p className="confirm-subtitle">Sesi login administrator akan diakhiri</p>
+              </div>
+            </div>
+
+            <div className="confirm-dialog-body">
+              <p className="confirm-message-text">
+                Anda akan diarahkan kembali ke halaman login. Pastikan semua perubahan telah tersimpan.
+              </p>
+            </div>
+
+            <div className="confirm-dialog-footer">
+              <button
+                type="button"
+                className="btn-confirm-cancel"
+                onClick={() => setIsLogoutConfirmOpen(false)}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className="btn-confirm-danger"
+                onClick={executeLogout}
+              >
+                <LogOut size={16} />
+                <span>Keluar Sesi</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Reset Data Confirmation Modal */}
+      {isResetConfirmOpen && (
+        <div className="modal-backdrop-overlay" onClick={() => setIsResetConfirmOpen(false)}>
+          <div
+            className="kiosk-modal-card confirm-dialog-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="confirm-dialog-header warning">
+              <div className="confirm-icon-wrap warning">
+                <RefreshCw size={22} />
+              </div>
+              <div>
+                <h3 className="confirm-title">Muat Ulang Data Contoh?</h3>
+                <p className="confirm-subtitle">Kembalikan daftar ke 4 data sampel awal BRMP DIY</p>
+              </div>
+            </div>
+
+            <div className="confirm-dialog-body">
+              <p className="confirm-message-text">
+                Tindakan ini akan memuat kembali 4 data kunjungan sampel bawaan sistem. Apakah Anda ingin melanjutkan?
+              </p>
+            </div>
+
+            <div className="confirm-dialog-footer">
+              <button
+                type="button"
+                className="btn-confirm-cancel"
+                onClick={() => setIsResetConfirmOpen(false)}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className="btn-confirm-warning"
+                onClick={executeResetData}
+              >
+                <RefreshCw size={16} />
+                <span>Ya, Muat Data Contoh</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="admin-toast-banner">
+          <CheckCircle2 size={18} className="text-emerald" />
+          <span>{toastMsg}</span>
+        </div>
+      )}
     </div>
   );
 }

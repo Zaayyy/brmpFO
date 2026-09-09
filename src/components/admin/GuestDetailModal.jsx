@@ -12,11 +12,12 @@ import {
   Clock,
   Printer,
   ExternalLink,
-  MessageSquare
+  MessageSquare,
+  Trash2
 } from 'lucide-react';
 import { soundManager } from '../../utils/audio';
 
-export default function GuestDetailModal({ isOpen, onClose, entry }) {
+export default function GuestDetailModal({ isOpen, onClose, entry, onDelete }) {
   if (!isOpen || !entry) return null;
 
   const handleClose = () => {
@@ -153,6 +154,17 @@ export default function GuestDetailModal({ isOpen, onClose, entry }) {
 
           {/* Footer Action */}
           <div className="detail-modal-footer">
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => onDelete(entry)}
+                className="btn-detail-action danger"
+                title="Hapus Catatan Kunjungan Ini"
+              >
+                <Trash2 size={16} />
+                <span>Hapus Data</span>
+              </button>
+            )}
             <button type="button" onClick={handlePrint} className="btn-detail-action outline">
               <Printer size={16} />
               <span>Cetak Tiket Tamu</span>
