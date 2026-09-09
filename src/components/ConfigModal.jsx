@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Settings, Link2, Globe, Check, Volume2, ClipboardList } from 'lucide-react';
+import { X, Settings, Link2, Globe, Check, Volume2, ClipboardList, Building2 } from 'lucide-react';
 import { soundManager } from '../utils/audio';
 
 export default function ConfigModal({
@@ -13,11 +13,14 @@ export default function ConfigModal({
   setExternalGuestUrl,
   questionnaireUrl,
   setQuestionnaireUrl,
+  officialWebUrl,
+  setOfficialWebUrl,
 }) {
   const [tempWebUrl, setTempWebUrl] = useState(websiteUrl);
   const [tempGuestType, setTempGuestType] = useState(guestbookType);
   const [tempGuestUrl, setTempGuestUrl] = useState(externalGuestUrl);
   const [tempQuestionnaireUrl, setTempQuestionnaireUrl] = useState(questionnaireUrl);
+  const [tempOfficialWebUrl, setTempOfficialWebUrl] = useState(officialWebUrl);
   const [savedAlert, setSavedAlert] = useState(false);
 
   if (!isOpen) return null;
@@ -30,6 +33,9 @@ export default function ConfigModal({
     setExternalGuestUrl(tempGuestUrl);
     if (setQuestionnaireUrl) {
       setQuestionnaireUrl(tempQuestionnaireUrl);
+    }
+    if (setOfficialWebUrl) {
+      setOfficialWebUrl(tempOfficialWebUrl);
     }
     setSavedAlert(true);
     setTimeout(() => {
@@ -101,6 +107,23 @@ export default function ConfigModal({
                   />
                 </div>
                 <small className="help-text">Tautan Google Form / instrumen survei kepuasan masyarakat yang dibuka saat tombol kuesioner diklik.</small>
+              </div>
+
+              {/* URL Website Kedinasan Kementan */}
+              <div className="form-field-group col-span-2">
+                <label className="field-label">URL Website Resmi Kedinasan (Kementan)</label>
+                <div className="field-input-wrap">
+                  <Building2 size={18} className="field-icon text-violet" />
+                  <input
+                    type="url"
+                    required
+                    value={tempOfficialWebUrl}
+                    onChange={(e) => setTempOfficialWebUrl(e.target.value)}
+                    placeholder="https://diy.brmp.pertanian.go.id/"
+                    className="text-input"
+                  />
+                </div>
+                <small className="help-text">Tautan portal resmi kedinasan Kementerian Pertanian (default: https://diy.brmp.pertanian.go.id/).</small>
               </div>
 
               {/* Tipe Aksi Buku Tamu */}

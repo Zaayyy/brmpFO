@@ -1,11 +1,17 @@
 import React, { useRef, useEffect } from 'react';
-import { Globe, ArrowRight, Sparkles, ExternalLink, Star } from 'lucide-react';
+import { Globe, ArrowRight, Sparkles, ExternalLink, Star, Building2 } from 'lucide-react';
 import { soundManager } from '../utils/audio';
 
-export default function HeroCards({ onOpenGuestbook, onOpenWebsite, onOpenQuestionnaire }) {
+export default function HeroCards({
+  onOpenGuestbook,
+  onOpenWebsite,
+  onOpenQuestionnaire,
+  onOpenOfficialWeb
+}) {
   const cardGuestbookRef = useRef(null);
   const cardWebsiteRef = useRef(null);
   const cardQuestionnaireRef = useRef(null);
+  const cardOfficialWebRef = useRef(null);
 
   // 3D Parallax Tilt Effect for desktop & smooth touch feedback
   const applyTiltEffect = (cardRef) => {
@@ -53,10 +59,12 @@ export default function HeroCards({ onOpenGuestbook, onOpenWebsite, onOpenQuesti
     const clean1 = applyTiltEffect(cardGuestbookRef);
     const clean2 = applyTiltEffect(cardWebsiteRef);
     const clean3 = applyTiltEffect(cardQuestionnaireRef);
+    const clean4 = applyTiltEffect(cardOfficialWebRef);
     return () => {
       if (clean1) clean1();
       if (clean2) clean2();
       if (clean3) clean3();
+      if (clean4) clean4();
     };
   }, []);
 
@@ -68,6 +76,8 @@ export default function HeroCards({ onOpenGuestbook, onOpenWebsite, onOpenQuesti
       onOpenWebsite();
     } else if (type === 'questionnaire') {
       onOpenQuestionnaire();
+    } else if (type === 'officialWeb') {
+      onOpenOfficialWeb();
     }
   };
 
@@ -469,6 +479,138 @@ export default function HeroCards({ onOpenGuestbook, onOpenWebsite, onOpenQuesti
               </div>
               <div className="tap-invite-hint">
                 <span className="tap-hand">👆</span> Sentuh layar untuk mengisi
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* ==================================================== */}
+        {/* CARD 4: WEBSITE RESMI KEDINASAN BRMP DIY            */}
+        {/* (diy.brmp.pertanian.go.id)                          */}
+        {/* ==================================================== */}
+        <div
+          ref={cardOfficialWebRef}
+          className="hero-action-card card-violet-theme"
+          onClick={() => handleCardClick('officialWeb')}
+          onMouseEnter={() => soundManager.playHover()}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleCardClick('officialWeb')}
+        >
+          {/* Eye-catching Attract Mode Radar Rings */}
+          <div className="radar-emitter">
+            <div className="radar-wave wave-1"></div>
+            <div className="radar-wave wave-2"></div>
+            <div className="radar-wave wave-3"></div>
+          </div>
+
+          {/* Glowing Animated Border Frame */}
+          <div className="animated-border-sheen"></div>
+
+          {/* Interactive Specular Light Sheen */}
+          <div className="card-specular-sheen"></div>
+
+          <div className="card-content-stack">
+
+            {/* Top Category Badge */}
+            <div className="top-badge-row">
+              <span className="badge-pill violet-pill">
+                <Building2 size={14} className="sparkle-icon" />
+                <span>PORTAL KEMENTERIAN PERTANIAN</span>
+              </span>
+              <span className="online-status-tag">
+                <span className="status-indicator-violet"></span> Portal Kedinasan
+              </span>
+            </div>
+
+            {/* Central 3D Vector Visual */}
+            <div className="visual-hero-box">
+              <div className="ambient-glow-circle violet-glow-bg"></div>
+
+              <div className="icon-3d-scene">
+                <svg viewBox="0 0 160 160" className="vector-3d-svg">
+                  <defs>
+                    <linearGradient id="govBldgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#818CF8" />
+                      <stop offset="45%" stopColor="#4F46E5" />
+                      <stop offset="100%" stopColor="#312E81" />
+                    </linearGradient>
+                    <linearGradient id="govRoofGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#FDE047" />
+                      <stop offset="60%" stopColor="#F59E0B" />
+                      <stop offset="100%" stopColor="#B45309" />
+                    </linearGradient>
+                    <linearGradient id="govGlassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#FFFFFF" />
+                      <stop offset="100%" stopColor="#C7D2FE" />
+                    </linearGradient>
+                    <filter id="shadowGov" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="12" stdDeviation="14" floodColor="#4F46E5" floodOpacity="0.4" />
+                    </filter>
+                  </defs>
+
+                  {/* 3D Government Agency Building */}
+                  <g filter="url(#shadowGov)">
+                    {/* Building Foundation Podium */}
+                    <rect x="22" y="112" width="116" height="12" rx="4" fill="url(#govBldgGrad)" />
+                    <rect x="26" y="104" width="108" height="8" rx="2" fill="#E2E8F0" />
+
+                    {/* Main Building Body */}
+                    <rect x="32" y="56" width="96" height="48" rx="4" fill="url(#govBldgGrad)" />
+
+                    {/* Glass Windows / Portico Arch */}
+                    <rect x="42" y="66" width="18" height="24" rx="4" fill="url(#govGlassGrad)" opacity="0.9" />
+                    <rect x="71" y="66" width="18" height="38" rx="4" fill="url(#govGlassGrad)" opacity="0.95" />
+                    <rect x="100" y="66" width="18" height="24" rx="4" fill="url(#govGlassGrad)" opacity="0.9" />
+
+                    {/* Columns */}
+                    <rect x="36" y="56" width="5" height="48" rx="1.5" fill="#FFFFFF" opacity="0.85" />
+                    <rect x="63" y="56" width="5" height="48" rx="1.5" fill="#FFFFFF" opacity="0.85" />
+                    <rect x="92" y="56" width="5" height="48" rx="1.5" fill="#FFFFFF" opacity="0.85" />
+                    <rect x="119" y="56" width="5" height="48" rx="1.5" fill="#FFFFFF" opacity="0.85" />
+
+                    {/* Triangular Pediment / Classical Roof */}
+                    <polygon points="80,24 24,56 136,56" fill="url(#govRoofGrad)" />
+                    <polygon points="80,30 36,54 124,54" fill="#FFFFFF" opacity="0.3" />
+
+                    {/* Government Emblem Seal Circle */}
+                    <circle cx="80" cy="46" r="6.5" fill="#FDE047" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.3))" />
+                    <circle cx="80" cy="46" r="4.5" fill="#D97706" />
+                  </g>
+
+                  {/* Animated Floating Indonesian Flagpole */}
+                  <g className="floating-pen-anim" transform="translate(10, 0)">
+                    <line x1="118" y1="20" x2="118" y2="54" stroke="#CBD5E1" strokeWidth="2.5" strokeLinecap="round" />
+                    <rect x="118" y="20" width="18" height="7" rx="1" fill="#EF4444" />
+                    <rect x="118" y="27" width="18" height="7" rx="1" fill="#FFFFFF" />
+                  </g>
+
+                  {/* Floating sparkles */}
+                  <circle cx="26" cy="22" r="3.5" fill="#FDE047" className="star-float-1" />
+                  <circle cx="138" cy="116" r="4.5" fill="#818CF8" className="star-float-2" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Typography & Description */}
+            <div className="card-text-block">
+              <h2 className="card-main-heading">WEBSITE RESMI BRMP DIY</h2>
+              <p className="card-description-text">
+                Portal resmi kedinasan Kementerian Pertanian RI untuk profil balai, publikasi ilmiah, berita agromodern, dan regulasi.
+              </p>
+            </div>
+
+            {/* Primary Action Button */}
+            <div className="card-bottom-cta">
+              <div className="prominent-button violet-cta-btn">
+                <span className="btn-label-text">Kunjungi Web Kedinasan</span>
+                <span className="btn-arrow-wrap">
+                  <ExternalLink size={20} className="btn-arrow-icon" />
+                </span>
+              </div>
+              <div className="tap-invite-hint">
+                <span className="tap-hand">👆</span> Sentuh layar untuk membuka
               </div>
             </div>
 

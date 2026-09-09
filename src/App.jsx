@@ -50,6 +50,12 @@ export default function App() {
       'https://docs.google.com/forms/d/e/1FAIpQLSeY3UsQnLzl6jUj6RFppdyID_oV8Ja4aygP_yAPHbwhZDxc8w/viewform'
     );
   });
+  const [officialWebUrl, setOfficialWebUrl] = useState(() => {
+    return (
+      localStorage.getItem('brmp_official_web_url') ||
+      'https://diy.brmp.pertanian.go.id/'
+    );
+  });
 
   const [greeting, setGreeting] = useState('');
 
@@ -105,6 +111,7 @@ export default function App() {
   useEffect(() => { localStorage.setItem('brmp_guest_type', guestbookType); }, [guestbookType]);
   useEffect(() => { localStorage.setItem('brmp_guest_ext_url', externalGuestUrl); }, [externalGuestUrl]);
   useEffect(() => { localStorage.setItem('brmp_survey_url', questionnaireUrl); }, [questionnaireUrl]);
+  useEffect(() => { localStorage.setItem('brmp_official_web_url', officialWebUrl); }, [officialWebUrl]);
 
   const handleOpenGuestbook = () => {
     setIsGuestbookOpen(true);
@@ -118,6 +125,14 @@ export default function App() {
     window.open(
       questionnaireUrl ||
         'https://docs.google.com/forms/d/e/1FAIpQLSeY3UsQnLzl6jUj6RFppdyID_oV8Ja4aygP_yAPHbwhZDxc8w/viewform',
+      '_blank',
+      'noopener,noreferrer'
+    );
+  };
+
+  const handleOpenOfficialWeb = () => {
+    window.open(
+      officialWebUrl || 'https://diy.brmp.pertanian.go.id/',
       '_blank',
       'noopener,noreferrer'
     );
@@ -224,12 +239,13 @@ export default function App() {
           </p>
         </section>
 
-        {/* 3 Main Hero Action Buttons */}
+        {/* 4 Main Hero Action Buttons */}
         <main className="main-cards-container">
           <HeroCards
             onOpenGuestbook={handleOpenGuestbook}
             onOpenWebsite={handleOpenWebsite}
             onOpenQuestionnaire={handleOpenQuestionnaire}
+            onOpenOfficialWeb={handleOpenOfficialWeb}
           />
         </main>
 
@@ -266,6 +282,8 @@ export default function App() {
         setExternalGuestUrl={setExternalGuestUrl}
         questionnaireUrl={questionnaireUrl}
         setQuestionnaireUrl={setQuestionnaireUrl}
+        officialWebUrl={officialWebUrl}
+        setOfficialWebUrl={setOfficialWebUrl}
       />
     </div>
   );
