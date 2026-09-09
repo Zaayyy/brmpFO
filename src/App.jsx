@@ -5,6 +5,7 @@ import HeroCards from './components/HeroCards';
 import GuestbookModal from './components/GuestbookModal';
 import WebsiteModal from './components/WebsiteModal';
 import ConfigModal from './components/ConfigModal';
+import QuestionnaireModal from './components/QuestionnaireModal';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import { checkAdminAuth } from './utils/guestbookStore';
@@ -16,6 +17,7 @@ export default function App() {
   const [isGuestbookOpen, setIsGuestbookOpen] = useState(false);
   const [isWebsiteOpen, setIsWebsiteOpen] = useState(false);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [isQuestionnaireOpen, setIsQuestionnaireOpen] = useState(false);
 
   // Page Routing: 'frontoffice' | 'admin'
   const [currentPage, setCurrentPage] = useState(() => {
@@ -122,12 +124,7 @@ export default function App() {
   };
 
   const handleOpenQuestionnaire = () => {
-    window.open(
-      questionnaireUrl ||
-        'https://docs.google.com/forms/d/e/1FAIpQLSeY3UsQnLzl6jUj6RFppdyID_oV8Ja4aygP_yAPHbwhZDxc8w/viewform',
-      '_blank',
-      'noopener,noreferrer'
-    );
+    setIsQuestionnaireOpen(true);
   };
 
   const handleOpenOfficialWeb = () => {
@@ -271,6 +268,11 @@ export default function App() {
       {/* Modals */}
       <GuestbookModal isOpen={isGuestbookOpen} onClose={() => setIsGuestbookOpen(false)} />
       <WebsiteModal isOpen={isWebsiteOpen} onClose={() => setIsWebsiteOpen(false)} websiteUrl={websiteUrl} />
+      <QuestionnaireModal
+        isOpen={isQuestionnaireOpen}
+        onClose={() => setIsQuestionnaireOpen(false)}
+        formUrl={questionnaireUrl}
+      />
       <ConfigModal
         isOpen={isConfigOpen}
         onClose={() => setIsConfigOpen(false)}
