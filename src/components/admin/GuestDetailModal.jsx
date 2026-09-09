@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   X,
   User,
@@ -13,16 +13,31 @@ import {
   Printer,
   ExternalLink,
   MessageSquare,
-  Trash2
+  Trash2,
+  Copy,
+  Check,
+  Building2,
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react';
 import { soundManager } from '../../utils/audio';
 
 export default function GuestDetailModal({ isOpen, onClose, entry, onDelete }) {
+  const [copiedId, setCopiedId] = useState(false);
+
   if (!isOpen || !entry) return null;
 
   const handleClose = () => {
     soundManager.playClick();
     onClose();
+  };
+
+  const handleCopyId = () => {
+    if (!entry.id) return;
+    navigator.clipboard.writeText(entry.id);
+    setCopiedId(true);
+    soundManager.playSuccess();
+    setTimeout(() => setCopiedId(false), 2000);
   };
 
   const getWaLink = (phone) => {
@@ -39,6 +54,8 @@ export default function GuestDetailModal({ isOpen, onClose, entry, onDelete }) {
     window.print();
   };
 
+  const initial = entry.nama?.charAt(0)?.toUpperCase() || 'T';
+
   return (
     <div className="modal-backdrop-overlay" onClick={handleClose}>
       <div
@@ -48,133 +65,211 @@ export default function GuestDetailModal({ isOpen, onClose, entry, onDelete }) {
         aria-modal="true"
       >
         {/* Top bar */}
-        <div className="modal-top-bar emerald-gradient-bar">
-          <div className="modal-title-group">
-            <div className="modal-logo-emblem-wrap">
+        <div className="guest-detail-top-bar">
+          <div className="guest-detail-title-group">
+            <div className="guest-detail-emblem-badge">
               <img src="/images/brmp_emblem.png" alt="BRMP DIY" className="modal-emblem-img" />
             </div>
             <div>
-              <h3 className="modal-title">Detail Kunjungan Tamu</h3>
-              <p className="modal-desc">{entry.id} • {entry.timestamp}</p>
+              <div className="guest-detail-badge-row">
+                <span className="guest-detail-live-chip">
+                  <span className="live-pulse-dot"></span>
+                  Buku Tamu FO
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyId}
+                  className="guest-id-copy-chip"
+                  title="Klik untuk salin ID Tamu"
+                >
+                  <span>{entry.id}</span>
+                  {copiedId ? (
+                    <span className="chip-copied-text">
+                      <Check size={12} /> Tersalin
+                    </span>
+                  ) : (
+                    <Copy size={12} className="chip-copy-icon" />
+                  )}
+                </button>
+              </div>
+              <h3 className="guest-detail-heading">Detail Kunjungan Tamu</h3>
             </div>
           </div>
-          <button className="modal-close-icon-btn" onClick={handleClose} aria-label="Tutup">
-            <X size={22} />
+          <button className="guest-detail-close-btn" onClick={handleClose} aria-label="Tutup Modal">
+            <X size={20} />
           </button>
         </div>
 
-        <div className="detail-modal-content">
-          {/* Guest Identity Card */}
-          <div className="detail-guest-badge-header">
-            <div className="avatar-letter-box">
-              {entry.nama?.charAt(0)?.toUpperCase() || 'T'}
+        <div className="guest-detail-modal-body">
+          {/* Guest Profile Hero Card */}
+          <div className="guest-profile-hero-card">
+            <div className="guest-profile-avatar-wrap">
+              <div className="guest-profile-avatar">
+                {initial}
+              </div>
+              <div className="guest-avatar-check-badge" title="Tamu Terdata">
+                <ShieldCheck size={14} />
+              </div>
             </div>
-            <div className="guest-info-block">
-              <h4 className="guest-full-name">{entry.nama}</h4>
-              <div className="guest-meta-tags">
-                <span className="guest-tag-pill tag-asal">{entry.asal}</span>
-                <span className="guest-tag-pill tag-edu">Pendidikan: {entry.pendidikan}</span>
-                <span className="guest-tag-pill tag-age">Usia: {entry.usia} Tahun</span>
+
+            <div className="guest-profile-main-info">
+              <div className="guest-profile-name-row">
+                <h4 className="guest-profile-name">{entry.nama}</h4>
+                <span className="guest-time-chip">
+                  <Clock size={13} />
+                  <span>{entry.timestamp}</span>
+                </span>
+              </div>
+
+              <div className="guest-profile-pills">
+                <span className="profile-pill pill-category">
+                  <User size={13} />
+                  <span>{entry.asal || 'Perorangan'}</span>
+                </span>
+                <span className="profile-pill pill-education">
+                  <GraduationCap size={13} />
+                  <span>Pendidikan: {entry.pendidikan || '-'}</span>
+                </span>
+                <span className="profile-pill pill-age">
+                  <Calendar size={13} />
+                  <span>Usia: {entry.usia} Tahun</span>
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Grid Information */}
-          <div className="detail-info-grid">
-            <div className="detail-grid-cell">
-              <div className="cell-label">
-                <Building size={16} className="text-emerald" />
-                <span>Instansi / Lembaga</span>
+          {/* Structured 2x2 Information Grid */}
+          <div className="guest-info-cards-grid">
+            {/* Instansi Card */}
+            <div className="guest-info-card">
+              <div className="info-card-header">
+                <div className="info-card-icon-box bg-emerald">
+                  <Building2 size={16} />
+                </div>
+                <span className="info-card-label">INSTANSI / LEMBAGA</span>
               </div>
-              <p className="cell-value">
-                {entry.asal === 'Perorangan' ? 'Perorangan / Pribadi' : entry.nama_instansi}
+              <p className="info-card-value">
+                {entry.asal === 'Perorangan' ? 'Perorangan / Pribadi' : (entry.nama_instansi || '-')}
               </p>
             </div>
 
-            <div className="detail-grid-cell">
-              <div className="cell-label">
-                <Briefcase size={16} className="text-emerald" />
-                <span>Pekerjaan / Jabatan</span>
+            {/* Pekerjaan Card */}
+            <div className="guest-info-card">
+              <div className="info-card-header">
+                <div className="info-card-icon-box bg-amber">
+                  <Briefcase size={16} />
+                </div>
+                <span className="info-card-label">PEKERJAAN / JABATAN</span>
               </div>
-              <p className="cell-value">{entry.pekerjaan || '-'}</p>
+              <p className="info-card-value">
+                {entry.pekerjaan || '-'}
+              </p>
             </div>
 
-            <div className="detail-grid-cell">
-              <div className="cell-label">
-                <Phone size={16} className="text-emerald" />
-                <span>No. Telepon / WhatsApp</span>
+            {/* Telepon Card */}
+            <div className="guest-info-card">
+              <div className="info-card-header">
+                <div className="info-card-icon-box bg-teal">
+                  <Phone size={16} />
+                </div>
+                <span className="info-card-label">NO. TELEPON / WHATSAPP</span>
               </div>
-              <div className="cell-value flex-row-align">
-                <span>{entry.telepon || '-'}</span>
+              <div className="info-card-action-row">
+                <span className="info-card-value-phone">{entry.telepon || '-'}</span>
                 {entry.telepon && (
                   <a
                     href={getWaLink(entry.telepon)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn-link-wa"
-                    title="Kirim pesan WhatsApp"
+                    className="btn-pill-wa"
+                    title="Buka percakapan WhatsApp"
                   >
-                    <MessageSquare size={14} />
+                    <MessageSquare size={13} />
                     <span>WhatsApp</span>
                   </a>
                 )}
               </div>
             </div>
 
-            <div className="detail-grid-cell">
-              <div className="cell-label">
-                <Mail size={16} className="text-emerald" />
-                <span>Alamat Email</span>
+            {/* Email Card */}
+            <div className="guest-info-card">
+              <div className="info-card-header">
+                <div className="info-card-icon-box bg-blue">
+                  <Mail size={16} />
+                </div>
+                <span className="info-card-label">ALAMAT EMAIL</span>
               </div>
-              <div className="cell-value flex-row-align">
-                <span>{entry.email || '-'}</span>
+              <div className="info-card-action-row">
+                <span className="info-card-value-email" title={entry.email || '-'}>
+                  {entry.email || '-'}
+                </span>
                 {entry.email && (
                   <a
                     href={`mailto:${entry.email}`}
-                    className="btn-link-email"
-                    title="Kirim Email"
+                    className="btn-pill-email"
+                    title="Kirim pesan Email"
                   >
-                    <ExternalLink size={14} />
+                    <ExternalLink size={13} />
                     <span>Email</span>
                   </a>
                 )}
               </div>
             </div>
 
-            <div className="detail-grid-cell col-span-2">
-              <div className="cell-label">
-                <FileText size={16} className="text-emerald" />
-                <span>Maksud & Keperluan Kunjungan</span>
+            {/* Keperluan Full Card */}
+            <div className="guest-info-card card-span-full">
+              <div className="info-card-header">
+                <div className="info-card-icon-box bg-purple">
+                  <FileText size={16} />
+                </div>
+                <span className="info-card-label">MAKSUD & KEPERLUAN KUNJUNGAN</span>
               </div>
-              <div className="keperluan-box-highlight">
-                <p>{entry.keperluan}</p>
+              <div className="keperluan-quote-box">
+                <p className="keperluan-quote-text">
+                  {entry.keperluan || 'Tidak ada keterangan khusus.'}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Footer Action */}
-          <div className="detail-modal-footer">
-            {onDelete && (
+          {/* Footer Actions */}
+          <div className="guest-detail-modal-footer">
+            <div className="footer-left">
+              {onDelete && (
+                <button
+                  type="button"
+                  onClick={() => onDelete(entry)}
+                  className="btn-guest-delete"
+                  title="Hapus data tamu ini secara permanen"
+                >
+                  <Trash2 size={16} />
+                  <span>Hapus Data</span>
+                </button>
+              )}
+            </div>
+
+            <div className="footer-right">
               <button
                 type="button"
-                onClick={() => onDelete(entry)}
-                className="btn-detail-action danger"
-                title="Hapus Catatan Kunjungan Ini"
+                onClick={handlePrint}
+                className="btn-guest-print"
+                title="Cetak struk / tiket tamu"
               >
-                <Trash2 size={16} />
-                <span>Hapus Data</span>
+                <Printer size={16} />
+                <span>Cetak Tiket Tamu</span>
               </button>
-            )}
-            <button type="button" onClick={handlePrint} className="btn-detail-action outline">
-              <Printer size={16} />
-              <span>Cetak Tiket Tamu</span>
-            </button>
-            <button type="button" onClick={handleClose} className="btn-detail-action primary">
-              <span>Tutup</span>
-            </button>
+              <button
+                type="button"
+                onClick={handleClose}
+                className="btn-guest-close"
+              >
+                <span>Tutup</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
