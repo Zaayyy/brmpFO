@@ -2490,34 +2490,7 @@ html, body {
   background: linear-gradient(135deg, var(--emerald-500) 0%, var(--emerald-700) 100%);
 }
 
-.admin-login-hint {
-  margin-top: 1.5rem;
-  padding: 0.85rem 1rem;
-  background: #f8fafc;
-  border: 1px dashed #cbd5e1;
-  border-radius: 12px;
-  text-align: center;
-}
 
-.hint-title {
-  font-size: 0.78rem;
-  color: #64748b;
-  font-weight: 600;
-  margin-bottom: 0.35rem;
-}
-
-.hint-creds {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  font-size: 0.84rem;
-  color: #1e293b;
-}
-
-.hint-creds strong {
-  color: var(--emerald-700);
-}
 
 .admin-login-footer {
   margin-top: 1.5rem;

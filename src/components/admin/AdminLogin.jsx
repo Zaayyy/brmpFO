@@ -149,16 +149,6 @@ export default function AdminLogin({ onLoginSuccess, onBackToFO }) {
           </button>
         </form>
 
-        {/* Helpful default credentials note */}
-        <div className="admin-login-hint">
-          <p className="hint-title">💡 Akun Akses Default Admin:</p>
-          <div className="hint-creds">
-            <span>Username: <strong>admin</strong></span>
-            <span>•</span>
-            <span>Password: <strong>admin</strong></span>
-          </div>
-        </div>
-
         {/* Footer info */}
         <div className="admin-login-footer">
           <p>© {new Date().getFullYear()} Balai Pengawasan dan Sertifikasi Benih • BRMP DIY</p>
