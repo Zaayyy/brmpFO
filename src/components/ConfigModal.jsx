@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Settings, Link2, Globe, Check, Volume2, ClipboardList, Building2 } from 'lucide-react';
+import { X, Settings, Link2, Globe, Check, Volume2, ClipboardList, Building2, FileSpreadsheet } from 'lucide-react';
 import { soundManager } from '../utils/audio';
+import { getGoogleSheetConfig, saveGoogleSheetConfig } from '../utils/googleSheetsService';
 
 export default function ConfigModal({
   isOpen,
@@ -21,6 +22,8 @@ export default function ConfigModal({
   const [tempGuestUrl, setTempGuestUrl] = useState(externalGuestUrl);
   const [tempQuestionnaireUrl, setTempQuestionnaireUrl] = useState(questionnaireUrl);
   const [tempOfficialWebUrl, setTempOfficialWebUrl] = useState(officialWebUrl);
+  const [tempScriptUrl, setTempScriptUrl] = useState(() => getGoogleSheetConfig().scriptUrl);
+  const [tempSheetUrl, setTempSheetUrl] = useState(() => getGoogleSheetConfig().sheetUrl);
   const [savedAlert, setSavedAlert] = useState(false);
 
   if (!isOpen) return null;
@@ -37,6 +40,7 @@ export default function ConfigModal({
     if (setOfficialWebUrl) {
       setOfficialWebUrl(tempOfficialWebUrl);
     }
+    saveGoogleSheetConfig({ scriptUrl: tempScriptUrl, sheetUrl: tempSheetUrl });
     setSavedAlert(true);
     setTimeout(() => {
       setSavedAlert(false);
@@ -176,6 +180,38 @@ export default function ConfigModal({
                   </div>
                 </div>
               )}
+
+              {/* URL Cloud Google Apps Script */}
+              <div className="form-field-group col-span-2">
+                <label className="field-label">URL Cloud Google Apps Script Web App (Buku Tamu)</label>
+                <div className="field-input-wrap">
+                  <FileSpreadsheet size={18} className="field-icon text-emerald" />
+                  <input
+                    type="url"
+                    value={tempScriptUrl}
+                    onChange={(e) => setTempScriptUrl(e.target.value)}
+                    placeholder="https://script.google.com/macros/s/AKfy.../exec"
+                    className="text-input"
+                  />
+                </div>
+                <small className="help-text">Jika diisi, data buku tamu otomatis tersimpan ke baris Google Spreadsheet secara real-time.</small>
+              </div>
+
+              {/* Tautan Langsung Google Spreadsheet */}
+              <div className="form-field-group col-span-2">
+                <label className="field-label">Tautan Google Spreadsheet (Opsional)</label>
+                <div className="field-input-wrap">
+                  <Link2 size={18} className="field-icon text-emerald" />
+                  <input
+                    type="url"
+                    value={tempSheetUrl}
+                    onChange={(e) => setTempSheetUrl(e.target.value)}
+                    placeholder="https://docs.google.com/spreadsheets/d/.../edit"
+                    className="text-input"
+                  />
+                </div>
+                <small className="help-text">Tautan langsung untuk membuka dan mengecek file spreadsheet kapan saja.</small>
+              </div>
 
               {/* Sound Test */}
               <div className="form-field-group col-span-2">

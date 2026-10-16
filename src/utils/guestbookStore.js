@@ -1,4 +1,5 @@
 // Data Store & Management for BRMP DIY Guestbook (Buku Tamu Digital)
+import { submitToGoogleSheet, fetchFromGoogleSheet, getGoogleSheetConfig } from './googleSheetsService';
 
 const STORAGE_KEY = 'brmp_guestbook_entries';
 const ADMIN_AUTH_KEY = 'brmp_admin_session';
@@ -76,7 +77,7 @@ export const getGuestbookEntries = () => {
   }
 };
 
-export const saveGuestbookEntry = (entryData) => {
+export const saveGuestbookEntry = async (entryData) => {
   try {
     const current = getGuestbookEntries();
     const now = new Date();
@@ -109,9 +110,32 @@ export const saveGuestbookEntry = (entryData) => {
 
     const updated = [newEntry, ...current];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
+    // Kirim secara otomatis ke Google Spreadsheet di background
+    try {
+      await submitToGoogleSheet(newEntry);
+    } catch (sheetErr) {
+      console.warn('Google Sheet auto-submit:', sheetErr);
+    }
+
     return newEntry;
   } catch (err) {
     console.error('Error saving guestbook entry:', err);
+    throw err;
+  }
+};
+
+export const syncGuestbookWithSheets = async () => {
+  try {
+    const cloudEntries = await fetchFromGoogleSheet();
+    if (Array.isArray(cloudEntries) && cloudEntries.length > 0) {
+      // Simpan data dari Google Spreadsheet sebagai data aktif
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudEntries));
+      return cloudEntries;
+    }
+    return getGuestbookEntries();
+  } catch (err) {
+    console.error('Gagal sinkronisasi data dari Spreadsheet:', err);
     throw err;
   }
 };

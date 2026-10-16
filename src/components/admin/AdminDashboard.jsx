@@ -23,7 +23,8 @@ import {
   PlusCircle,
   FileSpreadsheet,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  ExternalLink
 } from 'lucide-react';
 import { soundManager } from '../../utils/audio';
 import {
@@ -31,9 +32,12 @@ import {
   deleteGuestbookEntry,
   resetGuestbookData,
   clearAdminAuth,
-  exportEntriesToCSV
+  exportEntriesToCSV,
+  syncGuestbookWithSheets
 } from '../../utils/guestbookStore';
+import { getGoogleSheetConfig } from '../../utils/googleSheetsService';
 import GuestDetailModal from './GuestDetailModal';
+import GoogleSheetsModal from './GoogleSheetsModal';
 
 export default function AdminDashboard({ onLogout, onBackToFO }) {
   const [entries, setEntries] = useState([]);
@@ -46,16 +50,54 @@ export default function AdminDashboard({ onLogout, onBackToFO }) {
   const itemsPerPage = 8;
 
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isSheetsModalOpen, setIsSheetsModalOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [sheetConfig, setSheetConfig] = useState(() => getGoogleSheetConfig());
 
   useEffect(() => {
     // Load initial data
     setEntries(getGuestbookEntries());
+
+    // Auto-sync jika URL Google Sheet sudah dipasang
+    const cfg = getGoogleSheetConfig();
+    setSheetConfig(cfg);
+    if (cfg.scriptUrl) {
+      syncGuestbookWithSheets()
+        .then((cloudEntries) => {
+          if (cloudEntries && cloudEntries.length) {
+            setEntries(cloudEntries);
+          }
+        })
+        .catch(() => {});
+    }
 
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const handleSyncSheets = async () => {
+    const cfg = getGoogleSheetConfig();
+    setSheetConfig(cfg);
+    if (!cfg.scriptUrl) {
+      setIsSheetsModalOpen(true);
+      return;
+    }
+    soundManager.playClick();
+    setIsSyncing(true);
+    try {
+      const updated = await syncGuestbookWithSheets();
+      setEntries(updated);
+      soundManager.playSuccess();
+      showToast(`Data berhasil disinkronkan (${updated.length} tamu).`);
+    } catch (err) {
+      console.error(err);
+      showToast('Gagal sinkronisasi: ' + (err.message || 'Periksa koneksi Google Sheets.'));
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
@@ -382,8 +424,63 @@ export default function AdminDashboard({ onLogout, onBackToFO }) {
               </div>
             </div>
 
-            {/* Actions: Export, Print, Reset */}
-            <div className="table-action-btns">
+            {/* Actions: Export, Print, Reset, Google Sheets */}
+            <div className="table-action-btns" style={{ flexWrap: 'wrap' }}>
+              {/* Google Sheets Trigger */}
+              <button
+                type="button"
+                onClick={() => {
+                  soundManager.playClick();
+                  setIsSheetsModalOpen(true);
+                }}
+                className="btn-action-tool"
+                style={{
+                  background: sheetConfig.scriptUrl ? '#ecfdf5' : '#fffbeb',
+                  borderColor: sheetConfig.scriptUrl ? '#10b981' : '#f59e0b',
+                  color: sheetConfig.scriptUrl ? '#065f46' : '#b45309'
+                }}
+                title="Konfigurasi integrasi Google Spreadsheet Cloud"
+              >
+                <FileSpreadsheet size={16} />
+                <span>{sheetConfig.scriptUrl ? 'Google Sheets (Aktif)' : 'Hubungkan Sheets'}</span>
+              </button>
+
+              {sheetConfig.scriptUrl && (
+                <button
+                  type="button"
+                  onClick={handleSyncSheets}
+                  disabled={isSyncing}
+                  className="btn-action-tool"
+                  style={{
+                    background: '#f8fafc',
+                    borderColor: '#cbd5e1',
+                    color: '#334155'
+                  }}
+                  title="Sinkronkan data tamu terbaru dari Google Spreadsheet"
+                >
+                  <RefreshCw size={15} className={isSyncing ? 'spin-icon' : ''} />
+                  <span>{isSyncing ? 'Menyinkronkan...' : 'Sinkronkan'}</span>
+                </button>
+              )}
+
+              {sheetConfig.sheetUrl && (
+                <a
+                  href={sheetConfig.sheetUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-action-tool"
+                  style={{
+                    background: '#059669',
+                    color: '#ffffff',
+                    textDecoration: 'none'
+                  }}
+                  title="Buka dokumen Google Spreadsheet di tab baru"
+                >
+                  <ExternalLink size={15} />
+                  <span>Buka Sheet</span>
+                </a>
+              )}
+
               <button
                 type="button"
                 onClick={handleExportCSV}
@@ -743,6 +840,22 @@ export default function AdminDashboard({ onLogout, onBackToFO }) {
           </div>
         </div>
       )}
+
+      {/* Google Sheets Integration Modal */}
+      <GoogleSheetsModal
+        isOpen={isSheetsModalOpen}
+        onClose={() => {
+          setIsSheetsModalOpen(false);
+          setSheetConfig(getGoogleSheetConfig());
+        }}
+        onSyncComplete={(cloudData) => {
+          if (cloudData && Array.isArray(cloudData)) {
+            setEntries(cloudData);
+          }
+          setSheetConfig(getGoogleSheetConfig());
+        }}
+        showToast={showToast}
+      />
 
       {/* Toast Notification */}
       {toastMsg && (

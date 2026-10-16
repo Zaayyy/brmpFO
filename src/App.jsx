@@ -13,7 +13,7 @@ import { Leaf, ShieldCheck } from 'lucide-react';
 
 export default function App() {
   const [soundEnabled, setSoundEnabled] = useState(true);
-  
+
   const [isGuestbookOpen, setIsGuestbookOpen] = useState(false);
   const [isWebsiteOpen, setIsWebsiteOpen] = useState(false);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
@@ -90,6 +90,18 @@ export default function App() {
     window.location.hash = '';
     setCurrentPage('frontoffice');
   };
+
+  // Shortcut rahasia keyboard (Ctrl+Shift+A atau Alt+A) untuk membuka portal Admin
+  useEffect(() => {
+    const handleAdminKey = (e) => {
+      if ((e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') || (e.altKey && e.key.toLowerCase() === 'a')) {
+        e.preventDefault();
+        navigateToAdmin();
+      }
+    };
+    window.addEventListener('keydown', handleAdminKey);
+    return () => window.removeEventListener('keydown', handleAdminKey);
+  }, []);
 
   useEffect(() => {
     const updateGreeting = () => {
@@ -202,7 +214,7 @@ export default function App() {
       <ParticleBackground />
 
       <div className="kiosk-layout-wrapper">
-        
+
         <Header
           soundEnabled={soundEnabled}
           setSoundEnabled={setSoundEnabled}
@@ -217,7 +229,7 @@ export default function App() {
             <Leaf size={16} className="text-emerald" />
             <span className="greeting-text-val">{greeting}</span>
           </div>
-          
+
           <h2 className="hero-display-headline">
             Selamat Datang di{' '}
             <span className="gradient-text-animated">BRMP DIY</span>
@@ -230,10 +242,8 @@ export default function App() {
             </p>
             <span className="tagline-dash"></span>
           </div>
-          
-          <p className="hero-display-sub">
-            Satu pintu pelayanan terpadu untuk pengujian mutu, sertifikasi benih, dan modernisasi pertanian di <strong>Daerah Istimewa Yogyakarta</strong>.
-          </p>
+
+
         </section>
 
         {/* 4 Main Hero Action Buttons */}

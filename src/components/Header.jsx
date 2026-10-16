@@ -56,13 +56,31 @@ export default function Header({ soundEnabled, setSoundEnabled, onOpenConfig, on
   const minutes = String(time.getMinutes()).padStart(2, '0');
   const seconds = String(time.getSeconds()).padStart(2, '0');
 
+  const [logoClicks, setLogoClicks] = useState(0);
+
+  const handleLogoSecretClick = () => {
+    const next = logoClicks + 1;
+    if (next >= 4) {
+      if (onOpenAdmin) onOpenAdmin();
+      setLogoClicks(0);
+    } else {
+      setLogoClicks(next);
+      setTimeout(() => setLogoClicks(0), 2000);
+    }
+  };
+
   return (
     <header className="kiosk-header">
       <div className="header-glass-sheen"></div>
-      
+
       {/* Left: Branding & Official Logo */}
       <div className="header-left">
-        <div className="logo-badge-container">
+        <div
+          className="logo-badge-container"
+          onClick={handleLogoSecretClick}
+          title="BRMP D.I. Yogyakarta"
+          style={{ cursor: 'pointer' }}
+        >
           <div className="logo-emblem-wrap">
             <img
               src="/images/brmp_emblem.png"
@@ -73,9 +91,7 @@ export default function Header({ soundEnabled, setSoundEnabled, onOpenConfig, on
           </div>
 
           <div className="title-info">
-            <div className="region-pill">
-              <span className="gold-star">★</span> PEMERINTAH DAERAH D.I. YOGYAKARTA
-            </div>
+
             <h1 className="main-agency-title">
               BRMP <span>D.I. YOGYAKARTA</span>
             </h1>
@@ -104,7 +120,7 @@ export default function Header({ soundEnabled, setSoundEnabled, onOpenConfig, on
           </div>
         </div>
 
-        {/* Toolbar Controls */}
+        {/* Toolbar Controls (Hanya Suara & Fullscreen) */}
         <div className="header-action-btns">
           <button
             onClick={handleSoundToggle}
@@ -122,24 +138,6 @@ export default function Header({ soundEnabled, setSoundEnabled, onOpenConfig, on
             aria-label="Toggle Fullscreen"
           >
             {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
-          </button>
-
-          <button
-            onClick={onOpenConfig}
-            className="btn-icon-kiosk"
-            title="Pengaturan Kiosk"
-            aria-label="Settings"
-          >
-            <Settings size={20} />
-          </button>
-
-          <button
-            onClick={onOpenAdmin}
-            className="btn-icon-kiosk btn-admin-header-trigger"
-            title="Dashboard Admin Buku Tamu"
-            aria-label="Dashboard Admin"
-          >
-            <ShieldCheck size={20} className="text-emerald" />
           </button>
         </div>
       </div>

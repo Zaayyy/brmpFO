@@ -76,32 +76,30 @@ export default function GuestbookModal({ isOpen, onClose }) {
     return 'Nama Instansi / Dinas';
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     soundManager.playClick();
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      try {
-        const saved = saveGuestbookEntry(formData);
-        setSubmittedEntry(saved);
-        setIsSubmitting(false);
-        setIsSuccess(true);
-        soundManager.playSuccess();
+    try {
+      const saved = await saveGuestbookEntry(formData);
+      setSubmittedEntry(saved);
+      setIsSubmitting(false);
+      setIsSuccess(true);
+      soundManager.playSuccess();
 
-        // Trigger celebratory confetti
-        confetti({
-          particleCount: 110,
-          spread: 80,
-          origin: { y: 0.6 },
-          colors: ['#10B981', '#F59E0B', '#38BDF8', '#059669', '#FDE047']
-        });
-      } catch (err) {
-        console.error('Failed to submit:', err);
-        alert('Terjadi kendala saat menyimpan formulir. Silakan coba kembali.');
-        setIsSubmitting(false);
-      }
-    }, 600);
+      // Trigger celebratory confetti
+      confetti({
+        particleCount: 110,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#10B981', '#F59E0B', '#38BDF8', '#059669', '#FDE047']
+      });
+    } catch (err) {
+      console.error('Failed to submit:', err);
+      alert('Terjadi kendala saat menyimpan formulir. Silakan coba kembali.');
+      setIsSubmitting(false);
+    }
   };
 
   const handleResetForm = () => {
